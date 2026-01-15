@@ -36,10 +36,19 @@ facebook::fboss::utility::NeighborInfo getNeighborInfo(
     const facebook::fboss::InterfaceID& interfaceId,
     const folly::IPAddress& ip,
     facebook::fboss::AgentEnsemble& ensemble) {
+  auto state = ensemble.getProgrammedState();
+  auto intf = state->getInterfaces()->getNodeIf(interfaceId);
+  if (!intf) {
+    throw facebook::fboss::FbossError("no such interface ", interfaceId);
+  }
+  XLOG(DBG2) << "---sarah---test:interfaceId" << interfaceId; 
   auto switchId = ensemble.getSw()
                       ->getScopeResolver()
-                      ->scope(ensemble.masterLogicalPortIds())
+                      ->scope(intf, state)
                       .switchId();
+  XLOG(DBG2) << "---sarah---sizeof(switchId):" << sizeof(switchId); 
+  XLOG(DBG2) << "---sarah---switchId:" << switchId; 
+
   auto client = ensemble.getHwAgentTestClient(switchId);
   facebook::fboss::IfAndIP neighbor;
   neighbor.interfaceID() = interfaceId;
