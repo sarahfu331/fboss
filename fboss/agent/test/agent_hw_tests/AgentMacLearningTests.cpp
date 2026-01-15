@@ -98,7 +98,7 @@ class AgentMacLearningTest : public AgentHwTest {
       const AgentEnsemble& ensemble) const override {
     auto switchId = ensemble.getSw()
                         ->getScopeResolver()
-                        ->scope(ensemble.masterLogicalPortIds())
+                        ->scope(ensemble.masterLogicalPortIds()[0])
                         .switchId();
     auto asic = ensemble.getSw()->getHwAsicTable()->getHwAsic(switchId);
     auto cfg = utility::oneL3IntfTwoPortConfig(
