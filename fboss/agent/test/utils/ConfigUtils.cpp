@@ -805,6 +805,8 @@ cfg::SwitchConfig genPortVlanCfg(
         switchIdToSwitchInfo,
     const std::optional<std::map<SwitchID, const HwAsic*>>& hwAsicTable,
     const std::optional<PlatformType> platformType) {
+  const PlatformType platformTypeFixme = PlatformType::PLATFORM_LADAKH800BCLS;
+  XLOG(DBG5) << "---sarah---genPortVlanCfg: ";
   cfg::SwitchConfig config;
   if (switchIdToSwitchInfo.has_value() && hwAsicTable.has_value()) {
     populateSwitchInfo(
@@ -859,13 +861,18 @@ cfg::SwitchConfig genPortVlanCfg(
     if (asic->getInbandPortId().has_value()) {
       switchInfo.inbandPortId() = *asic->getInbandPortId();
     }
-    defaultSwitchIdToSwitchInfo.insert({SwitchID(switchId), switchInfo});
-    if (platformType.has_value() &&
-        platformType.value() == PlatformType::PLATFORM_LADAKH800BCLS) {
+    if (platformTypeFixme == PlatformType::PLATFORM_LADAKH800BCLS) {
+      XLOG(DBG2) << "---sarah---gen two hwAsicTable info";
+      std::array<int64_t, 2> switchId={0,1};
+      defaultHwAsicTable.insert({SwitchID(switchId[0]), asic});
+      defaultHwAsicTable.insert({SwitchID(switchId[1]), asic});
+      XLOG(DBG2) << "---sarah---gen two switchIdtoSwitchInfo info";
       populateSwitchInfoForLadakh(defaultSwitchIdToSwitchInfo);
+    } else {
+      defaultSwitchIdToSwitchInfo.insert({SwitchID(switchId), switchInfo});
     }
     populateSwitchInfo(
-        config, defaultSwitchIdToSwitchInfo, defaultHwAsicTable, platformType);
+        config, defaultSwitchIdToSwitchInfo, defaultHwAsicTable, platformTypeFixme);
   }
   if (FLAGS_enable_acl_table_group) {
     utility::setupDefaultAclTableGroups(config);
